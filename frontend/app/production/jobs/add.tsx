@@ -55,9 +55,25 @@ export default function AddJob() {
   };
 
   const handleSubmit = async () => {
-    if (!formData.customer_name || !formData.product_name || !formData.quantity || 
-        !formData.material_id || !formData.machine_id) {
-      Alert.alert('Error', 'Please fill all required fields');
+    // Validate all fields
+    if (!formData.customer_name.trim()) {
+      Alert.alert('Error', 'Please enter customer name');
+      return;
+    }
+    if (!formData.product_name.trim()) {
+      Alert.alert('Error', 'Please enter product name');
+      return;
+    }
+    if (!formData.quantity || parseInt(formData.quantity) <= 0) {
+      Alert.alert('Error', 'Please enter valid quantity');
+      return;
+    }
+    if (!formData.material_id) {
+      Alert.alert('Error', 'Please select a material');
+      return;
+    }
+    if (!formData.machine_id) {
+      Alert.alert('Error', 'Please select a machine');
       return;
     }
 
@@ -65,27 +81,38 @@ export default function AddJob() {
     try {
       const token = await AsyncStorage.getItem('session_token');
       const targetDate = new Date();
-      targetDate.setDate(targetDate.getDate() + parseInt(formData.target_days));
+      targetDate.setDate(targetDate.getDate() + parseInt(formData.target_days || '7'));
 
-      await axios.post(
+      const payload = {
+        customer_name: formData.customer_name.trim(),
+        product_name: formData.product_name.trim(),
+        quantity: parseInt(formData.quantity),
+        material_id: formData.material_id,
+        machine_id: formData.machine_id,
+        target_completion: targetDate.toISOString(),
+      };
+
+      console.log('Creating job with payload:', payload);
+
+      const response = await axios.post(
         `${API_URL}/api/jobs`,
-        {
-          customer_name: formData.customer_name,
-          product_name: formData.product_name,
-          quantity: parseInt(formData.quantity),
-          material_id: formData.material_id,
-          machine_id: formData.machine_id,
-          target_completion: targetDate.toISOString(),
-        },
+        payload,
         { headers: { Authorization: `Bearer ${token}` } }
       );
+
+      console.log('Job created successfully:', response.data);
 
       Alert.alert('Success', 'Job card created successfully', [
         { text: 'OK', onPress: () => router.back() },
       ]);
     } catch (error: any) {
       console.error('Error creating job:', error);
-      Alert.alert('Error', error.response?.data?.detail || 'Failed to create job');
+      console.error('Error response:', error.response?.data);
+      const errorMessage = error.response?.data?.detail || 
+                          error.response?.data?.message ||
+                          error.message ||
+                          'Failed to create job';
+      Alert.alert('Error', errorMessage);
     } finally {
       setLoading(false);
     }
