@@ -961,6 +961,150 @@ async def delete_inventory_item(
 async def get_dashboard_stats(
     session_token: Optional[str] = Cookie(None),
     authorization: Optional[str] = Header(None)
+
+
+# ============================================
+# SEARCH & REPORTS ENDPOINTS
+# ============================================
+
+@api_router.get("/reports/production")
+async def get_production_report(
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    session_token: Optional[str] = Cookie(None),
+    authorization: Optional[str] = Header(None)
+):
+    """Get production report with aggregations"""
+    await get_current_user(session_token, authorization)
+    
+    query = {}
+    if start_date and end_date:
+        query["created_at"] = {
+            "$gte": datetime.fromisoformat(start_date),
+            "$lte": datetime.fromisoformat(end_date)
+        }
+    
+    logs = await db.production_logs.find(query, {"_id": 0}).to_list(10000)
+    
+    total_produced = sum(log.get("produced_quantity", 0) for log in logs)
+    total_wastage = sum(log.get("wastage_quantity", 0) for log in logs)
+    total_downtime = sum(log.get("downtime_minutes", 0) for log in logs)
+    wastage_percent = (total_wastage / total_produced * 100) if total_produced > 0 else 0
+    
+    # Group by shift
+    shift_data = {}
+    for log in logs:
+        shift = log.get("shift", "unknown")
+        if shift not in shift_data:
+            shift_data[shift] = {"produced": 0, "wastage": 0}
+        shift_data[shift]["produced"] += log.get("produced_quantity", 0)
+        shift_data[shift]["wastage"] += log.get("wastage_quantity", 0)
+    
+    return {
+        "total_produced": total_produced,
+        "total_wastage": total_wastage,
+        "wastage_percent": round(wastage_percent, 2),
+        "total_downtime_hours": round(total_downtime / 60, 2),
+        "shift_breakdown": shift_data,
+        "logs_count": len(logs)
+    }
+
+@api_router.get("/reports/sales")
+async def get_sales_report(
+    start_date: Optional[str] = None,
+    end_date: Optional[str] = None,
+    session_token: Optional[str] = Cookie(None),
+    authorization: Optional[str] = Header(None)
+):
+    """Get sales report"""
+    await get_current_user(session_token, authorization)
+    
+    query = {}
+    if start_date and end_date:
+        query["order_date"] = {
+            "$gte": datetime.fromisoformat(start_date),
+            "$lte": datetime.fromisoformat(end_date)
+        }
+    
+    orders = await db.sales_orders.find(query, {"_id": 0}).to_list(10000)
+    
+    total_orders = len(orders)
+    total_revenue = sum(order.get("grand_total", 0) for order in orders)
+    total_gst = sum(order.get("gst_amount", 0) for order in orders)
+    
+    # Group by status
+    status_data = {}
+    for order in orders:
+        status = order.get("status", "unknown")
+        if status not in status_data:
+            status_data[status] = {"count": 0, "value": 0}
+        status_data[status]["count"] += 1
+        status_data[status]["value"] += order.get("grand_total", 0)
+    
+    return {
+        "total_orders": total_orders,
+        "total_revenue": round(total_revenue, 2),
+        "total_gst_collected": round(total_gst, 2),
+        "average_order_value": round(total_revenue / total_orders, 2) if total_orders > 0 else 0,
+        "status_breakdown": status_data
+    }
+
+@api_router.get("/reports/inventory-summary")
+async def get_inventory_report(
+    session_token: Optional[str] = Cookie(None),
+    authorization: Optional[str] = Header(None)
+):
+    """Get inventory summary report"""
+    await get_current_user(session_token, authorization)
+    
+    items = await db.inventory.find({}, {"_id": 0}).to_list(10000)
+    
+    total_items = len(items)
+    total_quantity = sum(item.get("quantity", 0) for item in items)
+    total_value = sum(item.get("quantity", 0) * item.get("unit_cost", 0) for item in items)
+    finished_count = len([i for i in items if i.get("is_finished")])
+    semi_finished_count = total_items - finished_count
+    
+    return {
+        "total_items": total_items,
+        "total_quantity": total_quantity,
+        "total_inventory_value": round(total_value, 2),
+        "finished_goods": finished_count,
+        "semi_finished_goods": semi_finished_count
+    }
+
+@api_router.get("/search")
+async def global_search(
+    q: str,
+    session_token: Optional[str] = Cookie(None),
+    authorization: Optional[str] = Header(None)
+):
+    """Global search across all entities"""
+    await get_current_user(session_token, authorization)
+    
+    search_query = {"$regex": q, "$options": "i"}
+    
+    materials = await db.raw_materials.find(
+        {"name": search_query},
+        {"_id": 0, "material_id": 1, "name": 1, "gsm": 1}
+    ).limit(5).to_list(5)
+    
+    customers = await db.customers.find(
+        {"name": search_query},
+        {"_id": 0, "customer_id": 1, "name": 1, "phone": 1}
+    ).limit(5).to_list(5)
+    
+    jobs = await db.job_cards.find(
+        {"$or": [{"job_number": search_query}, {"customer_name": search_query}]},
+        {"_id": 0, "job_id": 1, "job_number": 1, "customer_name": 1}
+    ).limit(5).to_list(5)
+    
+    return {
+        "materials": materials,
+        "customers": customers,
+        "jobs": jobs
+    }
+
 ):
     """Get dashboard statistics"""
     user = await get_current_user(session_token, authorization)
