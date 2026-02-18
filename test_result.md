@@ -111,11 +111,11 @@ user_problem_statement: |
 backend:
   - task: "Authentication System (Emergent Google OAuth)"
     implemented: true
-    working: "NA"
+    working: false
     file: "backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
@@ -127,6 +127,15 @@ backend:
           Uses MongoDB for users and user_sessions collections.
           Custom user_id field to avoid _id serialization issues.
           Role-based access with UserRole enum (owner, production_manager, inventory_manager, sales_manager, operator).
+      - working: false
+        agent: "testing"
+        comment: |
+          CRITICAL: Session creation endpoint returns 520 error due to external OAuth service issue.
+          External OAuth call to https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data returns 404.
+          Other auth endpoints working correctly:
+          - GET /api/auth/me properly returns 401 (protected)
+          - POST /api/auth/logout returns 200 (accessible)
+          Backend implementation is correct, issue is with external OAuth provider configuration.
   
   - task: "Raw Material Management API"
     implemented: true
