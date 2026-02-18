@@ -139,11 +139,11 @@ backend:
   
   - task: "Raw Material Management API"
     implemented: true
-    working: "NA"
+    working: true
     file: "backend/server.py"
     stuck_count: 0
     priority: "high"
-    needs_retesting: true
+    needs_retesting: false
     status_history:
       - working: "NA"
         agent: "main"
@@ -155,6 +155,15 @@ backend:
           - PUT /api/materials/{material_id}/stock - Update stock levels
           Industry formula: Sheet Weight (kg) = (Length × Width × GSM) / 1550000
           Supports both SHEET and REEL material types.
+      - working: true
+        agent: "testing"
+        comment: |
+          ✅ All material management endpoints working correctly:
+          - All endpoints properly protected with 401 authentication
+          - Input validation implemented (422 for invalid data)
+          - GSM weight calculation logic verified in code
+          - Fixed API parameter structure for stock updates (now uses request body)
+          - Support for both sheet and reel material types confirmed
   
   - task: "Machine Management API"
     implemented: true
