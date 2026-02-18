@@ -856,6 +856,124 @@ async def update_order_status(
 # DASHBOARD ENDPOINTS
 # ============================================
 
+
+
+# ============================================
+# UPDATE/EDIT ENDPOINTS
+# ============================================
+
+@api_router.put("/materials/{material_id}")
+async def update_material(
+    material_id: str,
+    material: RawMaterialCreate,
+    session_token: Optional[str] = Cookie(None),
+    authorization: Optional[str] = Header(None)
+):
+    """Update a raw material"""
+    await get_current_user(session_token, authorization)
+    
+    # Calculate weight
+    weight = calculate_paper_weight(
+        material.material_type,
+        material.gsm,
+        material.length_inch,
+        material.width_inch,
+        material.diameter_inch,
+        material.width_reel_inch,
+        material.quantity
+    )
+    
+    update_data = {
+        **material.dict(),
+        "weight_kg": weight,
+        "updated_at": datetime.now(timezone.utc)
+    }
+    
+    result = await db.raw_materials.update_one(
+        {"material_id": material_id},
+        {"$set": update_data}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Material not found")
+    
+    updated = await db.raw_materials.find_one({"material_id": material_id}, {"_id": 0})
+    return RawMaterial(**updated)
+
+@api_router.put("/machines/{machine_id}")
+async def update_machine(
+    machine_id: str,
+    machine: MachineCreate,
+    session_token: Optional[str] = Cookie(None),
+    authorization: Optional[str] = Header(None)
+):
+    """Update a machine"""
+    user = await get_current_user(session_token, authorization)
+    
+    if user.role not in [UserRole.OWNER, UserRole.PRODUCTION_MANAGER]:
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
+    
+    result = await db.machines.update_one(
+        {"machine_id": machine_id},
+        {"$set": machine.dict()}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Machine not found")
+    
+    updated = await db.machines.find_one({"machine_id": machine_id}, {"_id": 0})
+    return Machine(**updated)
+
+@api_router.put("/customers/{customer_id}")
+async def update_customer(
+    customer_id: str,
+    customer: CustomerCreate,
+    session_token: Optional[str] = Cookie(None),
+    authorization: Optional[str] = Header(None)
+):
+    """Update a customer"""
+    user = await get_current_user(session_token, authorization)
+    
+    if user.role not in [UserRole.OWNER, UserRole.SALES_MANAGER]:
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
+    
+    result = await db.customers.update_one(
+        {"customer_id": customer_id},
+        {"$set": customer.dict()}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Customer not found")
+    
+    updated = await db.customers.find_one({"customer_id": customer_id}, {"_id": 0})
+    return Customer(**updated)
+
+@api_router.put("/inventory/{inventory_id}")
+async def update_inventory_item(
+    inventory_id: str,
+    item: InventoryItemCreate,
+    session_token: Optional[str] = Cookie(None),
+    authorization: Optional[str] = Header(None)
+):
+    """Update an inventory item"""
+    await get_current_user(session_token, authorization)
+    
+    update_data = {
+        **item.dict(),
+        "updated_at": datetime.now(timezone.utc)
+    }
+    
+    result = await db.inventory.update_one(
+        {"inventory_id": inventory_id},
+        {"$set": update_data}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Inventory item not found")
+    
+    updated = await db.inventory.find_one({"inventory_id": inventory_id}, {"_id": 0})
+    return InventoryItem(**updated)
+
 # ============================================
 # DELETE ENDPOINTS
 # ============================================
