@@ -47,6 +47,33 @@ export default function MaterialsScreen() {
     }
   };
 
+  const handleDelete = (materialId: string, materialName: string) => {
+    Alert.alert(
+      'Delete Material',
+      `Are you sure you want to delete "${materialName}"? This action cannot be undone.`,
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            try {
+              const token = await AsyncStorage.getItem('session_token');
+              await axios.delete(`${API_URL}/api/materials/${materialId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+              });
+              Alert.alert('Success', 'Material deleted successfully');
+              fetchMaterials(); // Refresh the list
+            } catch (error: any) {
+              console.error('Error deleting material:', error);
+              Alert.alert('Error', error.response?.data?.detail || 'Failed to delete material');
+            }
+          },
+        },
+      ]
+    );
+  };
+
   useEffect(() => {
     fetchMaterials();
   }, []);
