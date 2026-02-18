@@ -479,10 +479,13 @@ async def get_low_stock_materials(
     ).to_list(1000)
     return [RawMaterial(**mat) for mat in materials]
 
+class StockUpdateRequest(BaseModel):
+    quantity_change: float
+
 @api_router.put("/materials/{material_id}/stock")
 async def update_material_stock(
     material_id: str,
-    quantity_change: float,
+    request: StockUpdateRequest,
     session_token: Optional[str] = Cookie(None),
     authorization: Optional[str] = Header(None)
 ):
