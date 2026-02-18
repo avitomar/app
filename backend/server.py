@@ -856,6 +856,107 @@ async def update_order_status(
 # DASHBOARD ENDPOINTS
 # ============================================
 
+# ============================================
+# DELETE ENDPOINTS
+# ============================================
+
+@api_router.delete("/materials/{material_id}")
+async def delete_material(
+    material_id: str,
+    session_token: Optional[str] = Cookie(None),
+    authorization: Optional[str] = Header(None)
+):
+    """Delete a material"""
+    await get_current_user(session_token, authorization)
+    
+    result = await db.raw_materials.delete_one({"material_id": material_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Material not found")
+    
+    return {"message": "Material deleted successfully"}
+
+@api_router.delete("/machines/{machine_id}")
+async def delete_machine(
+    machine_id: str,
+    session_token: Optional[str] = Cookie(None),
+    authorization: Optional[str] = Header(None)
+):
+    """Delete a machine"""
+    user = await get_current_user(session_token, authorization)
+    
+    if user.role not in [UserRole.OWNER, UserRole.PRODUCTION_MANAGER]:
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
+    
+    result = await db.machines.delete_one({"machine_id": machine_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Machine not found")
+    
+    return {"message": "Machine deleted successfully"}
+
+@api_router.delete("/jobs/{job_id}")
+async def delete_job(
+    job_id: str,
+    session_token: Optional[str] = Cookie(None),
+    authorization: Optional[str] = Header(None)
+):
+    """Delete a job card"""
+    await get_current_user(session_token, authorization)
+    
+    result = await db.job_cards.delete_one({"job_id": job_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Job not found")
+    
+    return {"message": "Job deleted successfully"}
+
+@api_router.delete("/customers/{customer_id}")
+async def delete_customer(
+    customer_id: str,
+    session_token: Optional[str] = Cookie(None),
+    authorization: Optional[str] = Header(None)
+):
+    """Delete a customer"""
+    user = await get_current_user(session_token, authorization)
+    
+    if user.role not in [UserRole.OWNER, UserRole.SALES_MANAGER]:
+        raise HTTPException(status_code=403, detail="Insufficient permissions")
+    
+    result = await db.customers.delete_one({"customer_id": customer_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Customer not found")
+    
+    return {"message": "Customer deleted successfully"}
+
+@api_router.delete("/orders/{order_id}")
+async def delete_order(
+    order_id: str,
+    session_token: Optional[str] = Cookie(None),
+    authorization: Optional[str] = Header(None)
+):
+    """Delete an order"""
+    await get_current_user(session_token, authorization)
+    
+    result = await db.sales_orders.delete_one({"order_id": order_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Order not found")
+    
+    return {"message": "Order deleted successfully"}
+
+@api_router.delete("/inventory/{inventory_id}")
+async def delete_inventory_item(
+    inventory_id: str,
+    session_token: Optional[str] = Cookie(None),
+    authorization: Optional[str] = Header(None)
+):
+    """Delete an inventory item"""
+    await get_current_user(session_token, authorization)
+    
+    result = await db.inventory.delete_one({"inventory_id": inventory_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Inventory item not found")
+    
+    return {"message": "Inventory item deleted successfully"}
+
+
 @api_router.get("/dashboard/stats", response_model=DashboardStats)
 async def get_dashboard_stats(
     session_token: Optional[str] = Cookie(None),
