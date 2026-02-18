@@ -961,6 +961,9 @@ async def delete_inventory_item(
 async def get_dashboard_stats(
     session_token: Optional[str] = Cookie(None),
     authorization: Optional[str] = Header(None)
+):
+    """Get dashboard statistics"""
+    user = await get_current_user(session_token, authorization)
 
 
 # ============================================
