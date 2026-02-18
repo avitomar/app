@@ -957,15 +957,6 @@ async def delete_inventory_item(
     return {"message": "Inventory item deleted successfully"}
 
 
-@api_router.get("/dashboard/stats", response_model=DashboardStats)
-async def get_dashboard_stats(
-    session_token: Optional[str] = Cookie(None),
-    authorization: Optional[str] = Header(None)
-):
-    """Get dashboard statistics"""
-    user = await get_current_user(session_token, authorization)
-
-
 # ============================================
 # SEARCH & REPORTS ENDPOINTS
 # ============================================
