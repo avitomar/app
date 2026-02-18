@@ -37,6 +37,17 @@ export default function Login() {
           <Ionicons name="logo-google" size={24} color="#fff" style={styles.buttonIcon} />
           <Text style={styles.loginButtonText}>Sign in with Google</Text>
         </TouchableOpacity>
+
+        <TouchableOpacity 
+          style={styles.devButton}
+          onPress={() => {
+            const router = require('expo-router').useRouter();
+            router.push('/dev-login');
+          }}
+        >
+          <Ionicons name="code" size={20} color="#64748b" />
+          <Text style={styles.devButtonText}>Development Login (Test Mode)</Text>
+        </TouchableOpacity>
         
         <Text style={styles.note}>For Paper & Stationery Manufacturing Factories</Text>
       </View>
