@@ -496,7 +496,7 @@ async def update_material_stock(
     if not material:
         raise HTTPException(status_code=404, detail="Material not found")
     
-    new_quantity = material["quantity"] + quantity_change
+    new_quantity = material["quantity"] + request.quantity_change
     if new_quantity < 0:
         raise HTTPException(status_code=400, detail="Insufficient stock")
     
