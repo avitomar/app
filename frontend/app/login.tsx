@@ -3,8 +3,11 @@ import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { Linking } from 'react-native';
 import Constants from 'expo-constants';
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 
 export default function Login() {
+  const router = useRouter();
+
   const handleGoogleLogin = async () => {
     try {
       // REMINDER: DO NOT HARDCODE THE URL, OR ADD ANY FALLBACKS OR REDIRECT URLS, THIS BREAKS THE AUTH
@@ -40,10 +43,7 @@ export default function Login() {
 
         <TouchableOpacity 
           style={styles.devButton}
-          onPress={() => {
-            const router = require('expo-router').useRouter();
-            router.push('/dev-login');
-          }}
+          onPress={() => router.push('/dev-login')}
         >
           <Ionicons name="code" size={20} color="#64748b" />
           <Text style={styles.devButtonText}>Development Login (Test Mode)</Text>
