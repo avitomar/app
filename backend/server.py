@@ -824,19 +824,22 @@ async def get_orders(
     orders = await db.sales_orders.find(query, {"_id": 0}).sort("created_at", -1).to_list(1000)
     return [SalesOrder(**order) for order in orders]
 
+class OrderStatusUpdate(BaseModel):
+    status: OrderStatus
+
 @api_router.put("/orders/{order_id}/status")
 async def update_order_status(
     order_id: str,
-    status: OrderStatus,
+    request: OrderStatusUpdate,
     session_token: Optional[str] = Cookie(None),
     authorization: Optional[str] = Header(None)
 ):
     """Update order status"""
     await get_current_user(session_token, authorization)
     
-    update_data = {"status": status, "updated_at": datetime.now(timezone.utc)}
+    update_data = {"status": request.status, "updated_at": datetime.now(timezone.utc)}
     
-    if status == OrderStatus.DISPATCHED:
+    if request.status == OrderStatus.DISPATCHED:
         update_data["dispatched_date"] = datetime.now(timezone.utc)
     
     result = await db.sales_orders.update_one(
