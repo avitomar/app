@@ -160,50 +160,74 @@ export default function AddJob() {
           <Text style={styles.sectionTitle}>Production Setup</Text>
           
           <Text style={styles.inputLabel}>Select Material *</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
-            {materials.map((mat: any) => (
+          {materials.length === 0 ? (
+            <View style={styles.emptyBox}>
+              <Text style={styles.emptyBoxText}>No materials available. Please add materials first.</Text>
               <TouchableOpacity
-                key={mat.material_id}
-                style={[
-                  styles.chip,
-                  formData.material_id === mat.material_id && styles.chipActive,
-                ]}
-                onPress={() => setFormData({ ...formData, material_id: mat.material_id })}
+                style={styles.emptyBoxButton}
+                onPress={() => router.push('/production/materials/add')}
               >
-                <Text
-                  style={[
-                    styles.chipText,
-                    formData.material_id === mat.material_id && styles.chipTextActive,
-                  ]}
-                >
-                  {mat.name}
-                </Text>
+                <Text style={styles.emptyBoxButtonText}>Add Material</Text>
               </TouchableOpacity>
-            ))}
-          </ScrollView>
+            </View>
+          ) : (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
+              {materials.map((mat: any) => (
+                <TouchableOpacity
+                  key={mat.material_id}
+                  style={[
+                    styles.chip,
+                    formData.material_id === mat.material_id && styles.chipActive,
+                  ]}
+                  onPress={() => setFormData({ ...formData, material_id: mat.material_id })}
+                >
+                  <Text
+                    style={[
+                      styles.chipText,
+                      formData.material_id === mat.material_id && styles.chipTextActive,
+                    ]}
+                  >
+                    {mat.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          )}
 
           <Text style={styles.inputLabel}>Select Machine *</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
-            {machines.map((mach: any) => (
+          {machines.length === 0 ? (
+            <View style={styles.emptyBox}>
+              <Text style={styles.emptyBoxText}>No machines available. Please add machines first.</Text>
               <TouchableOpacity
-                key={mach.machine_id}
-                style={[
-                  styles.chip,
-                  formData.machine_id === mach.machine_id && styles.chipActive,
-                ]}
-                onPress={() => setFormData({ ...formData, machine_id: mach.machine_id })}
+                style={styles.emptyBoxButton}
+                onPress={() => router.push('/production/machines/add')}
               >
-                <Text
-                  style={[
-                    styles.chipText,
-                    formData.machine_id === mach.machine_id && styles.chipTextActive,
-                  ]}
-                >
-                  {mach.name}
-                </Text>
+                <Text style={styles.emptyBoxButtonText}>Add Machine</Text>
               </TouchableOpacity>
-            ))}
-          </ScrollView>
+            </View>
+          ) : (
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipScroll}>
+              {machines.map((mach: any) => (
+                <TouchableOpacity
+                  key={mach.machine_id}
+                  style={[
+                    styles.chip,
+                    formData.machine_id === mach.machine_id && styles.chipActive,
+                  ]}
+                  onPress={() => setFormData({ ...formData, machine_id: mach.machine_id })}
+                >
+                  <Text
+                    style={[
+                      styles.chipText,
+                      formData.machine_id === mach.machine_id && styles.chipTextActive,
+                    ]}
+                  >
+                    {mach.name}
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </ScrollView>
+          )}
 
           <InputField
             label="Target Completion (Days)"
