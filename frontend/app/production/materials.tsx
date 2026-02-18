@@ -177,6 +177,16 @@ export default function MaterialsScreen() {
                   <Text style={styles.alertText}>Below reorder level</Text>
                 </View>
               )}
+
+              <View style={styles.actionButtons}>
+                <TouchableOpacity
+                  style={styles.deleteButton}
+                  onPress={() => handleDelete(material.material_id, material.name)}
+                >
+                  <Ionicons name="trash-outline" size={20} color="#ef4444" />
+                  <Text style={styles.deleteButtonText}>Delete</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           ))
         )}
