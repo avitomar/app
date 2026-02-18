@@ -196,7 +196,8 @@ def generate_backend_report():
     non_working = [r for r in api_results if not r["working"]]
     if non_working:
         for result in non_working:
-            print(f"   • {result['description']}: {result.get('error', f\"Status {result['status_code']}\")}")
+            status_msg = result.get('error', f"Status {result['status_code']}")
+            print(f"   • {result['description']}: {status_msg}")
     
     if session_working and not non_working:
         print(f"   • No critical backend issues identified")
