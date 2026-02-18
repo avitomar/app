@@ -77,7 +77,11 @@ export default function Inventory() {
         <Text style={styles.sectionTitle}>Inventory Categories</Text>
 
         {menuItems.map((item, index) => (
-          <TouchableOpacity key={index} style={styles.menuCard}>
+          <TouchableOpacity 
+            key={index} 
+            style={styles.menuCard}
+            onPress={() => item.route && router.push(item.route as any)}
+          >
             <View style={[styles.iconContainer, { backgroundColor: item.color + '20' }]}>
               <Ionicons name={item.icon as any} size={28} color={item.color} />
             </View>
