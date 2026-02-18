@@ -8,6 +8,13 @@ export default function Inventory() {
 
   const menuItems = [
     {
+      title: 'View Inventory',
+      description: 'Finished & Semi-Finished Goods',
+      icon: 'list',
+      color: '#2563eb',
+      route: '/inventory/list',
+    },
+    {
       title: 'Finished Goods',
       description: 'Completed products ready for sale',
       icon: 'checkmark-circle',
