@@ -364,4 +364,28 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
+  emptyBox: {
+    backgroundColor: '#fffbeb',
+    padding: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#fde68a',
+    marginBottom: 20,
+  },
+  emptyBoxText: {
+    fontSize: 14,
+    color: '#92400e',
+    marginBottom: 12,
+  },
+  emptyBoxButton: {
+    backgroundColor: '#f59e0b',
+    padding: 10,
+    borderRadius: 6,
+    alignItems: 'center',
+  },
+  emptyBoxButtonText: {
+    color: '#fff',
+    fontSize: 14,
+    fontWeight: '600',
+  },
 });
